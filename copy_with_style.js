@@ -11,7 +11,7 @@
  * that can reliably be emailed. Most email clients today (2021) have patchy or no support for the style tag.
  * Conversely most email clients respect and render inline style attributes faithfully.
  *
- * @link   URL
+ * @link   https://github.com/bernd-wechner/Copy-with-Style/
  * @file   This files defines the Copy_With_Style class.
  * @author Bernd Wechner.
  * @copyright 2001
