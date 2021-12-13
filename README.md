@@ -22,9 +22,9 @@ We expose a single class `Copy_With_Style` that can be instantiated in client-si
 
 ```javascript
 const clipboard = new Copy_With_Style({ button: document.getElementById("button_to_copy"),
-									    element: document.getElementById("element_to_copy"),
- 									    stylesheets: ["default.css"],
-									  }); 
+                                        element: document.getElementById("element_to_copy"),
+                                        stylesheets: ["default.css"],
+                                      }); 
 ```
 
 To clarify, this is delectably clear and intutitve JavaScript notation (not - sarcasm detected)! It is the de facto standard all the same, for passing a list of optional, named arguments to a function (in this case a [class](https://www.w3schools.com/Js/js_classes.asp) constructor).
