@@ -1,0 +1,31 @@
+/*  A normal, neutral style for the copy button
+	When clicked the button will prepare a copy and/or copy to clipboard
+	based onthe trigger configurations. This style calss is added to
+	the nominated buttoin and never removed. 
+*/
+button.copy_with_style { }
+
+/*  A style to use when a copy is being prepared
+	The button will either be disabled (not clickable) or
+	bound to a restart_the_preparation command (will simply retsart 
+	the preparation when clicked)
+	
+	This class is added in addtions ot "copy_with_style" when 
+	strings to place on the clipboard ar ebeing prepared. And
+	removed when the prepartion is complete.   
+*/
+button.preparing_for_copy {
+	background-color: #ffc7c7;
+}
+
+/*  A style to use when a copy is ready 
+	Clicking the button now will copy the to the clipboard the prepared copy
+	
+	This class is added when "preparing_for_copy" is rmeoved and removed only
+	when the prepared copy is invalidated. Which can be by an explicit call
+	to .invalidate(), or if 
+*/
+button.ready_to_copy {
+    transform: scale(1.3, 1.3);
+    background-color: #8ae234;
+}
