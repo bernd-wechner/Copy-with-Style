@@ -1,3 +1,5 @@
+![Copy with Style](https://raw.githubusercontent.com/bernd-wechner/Copy-with-Style/master/copy-with-style.png)
+
 ## Copy With Style
 
 A simple single file (or two with a small .css file), JavaScript class under 1000 lines, using only native ES6 and no external libraries that can by attached to a `button` and associated with an `element` such that when the button is clicked the element is copied to the clipboard as true as possible to what is rendered in the browser.
