@@ -168,7 +168,7 @@ class Copy_With_Style {
 		this.shallow_exclusions = shallow_exclusions,
 		this.extra_deep_exclusions = extra_deep_exclusions,
 		this.extra_shallow_exclusions = extra_shallow_exclusions,
-        	this.debug = debug;
+		this.debug = debug;
 		this.log_performance = log_performance;
 		this.log_HTML_to_console = log_HTML_to_console;
 		this.log_text_to_console = log_text_to_console;
@@ -216,10 +216,10 @@ class Copy_With_Style {
 			}
 			this.to_clipboard();
 			// But support injection of arbitrary content as well
-		} else if (typeof content === 'string' || content instanceof String) {
-			this.#copy_to_clipboard(content)
-		} else if (typeof content.toString === 'function') {
-			this.#copy_to_clipboard(content.toString())
+		} else if (typeof content === "string" || content instanceof String) {
+			this.#copy_to_clipboard(content);
+		} else if (typeof content.toString === "function") {
+			this.#copy_to_clipboard(content.toString());
 		}
 	}
 
@@ -314,11 +314,11 @@ class Copy_With_Style {
 		if (this.debug) console.log(`Preparing progress bar: ${this.progress}, ${this.show_progress}`);
 		if (this.progress) {
 			if (this.show_progress) {
-				if (this.debug) console.log(`Enabling progress bar!`);
+				if (this.debug) console.log("Enabling progress bar!");
 				this.progress.value = 0;
 				this.progress.style.display = "inline";
 			} else {
-				if (this.debug) console.log(`Disabling progress bar!`);
+				if (this.debug) console.log("Disabling progress bar!");
 				this.progress.style.display = "none";
 			}
 		}
@@ -379,12 +379,12 @@ class Copy_With_Style {
 				if (this.debug) console.log(`UI deferral policy: [${defer}]. Now inlining styles for ${nelements} elements.`);
 
 				if (this.log_performance) {
-				    const done = performance.now();
-				    const runtime = done - start;
-				    const rate1 = runtime / nelements;
-				    const rate2 = nelements / runtime * 1000;
-				    console.log(`Inlined styles on ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
-				    start = performance.now()
+					const done = performance.now();
+					const runtime = done - start;
+					const rate1 = runtime / nelements;
+					const rate2 = nelements / runtime * 1000;
+					console.log(`Inlined styles on ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
+					start = performance.now()
 				}
 
 				for (let pair of pairs) {
@@ -393,7 +393,7 @@ class Copy_With_Style {
 						i++;
 					}
 					if (this.show_progress && this.progress) this.progress.value = i;
-					if (defer && (typeof (defer) === "boolean" || (Array.isArray(defer) && defer.length == 2 && nelements > defer[0] && i % defer[1] === 0)))
+					if (defer && (typeof (defer) === "boolean" || (Array.isArray(defer) && defer.length === 2 && nelements > defer[0] && i % defer[1] === 0)))
 						await this.#defer_to_UI();
 					if (this.#bail) {
 						if (this.debug) console.log("Bailing ...");
@@ -441,7 +441,7 @@ class Copy_With_Style {
 			for (let sheet of document.styleSheets) {
 				if (sheet.href && (sheets.length == 0 || sheets.includes(this.#basename(sheet.href)))) {
 					let rules = [];
-					for (let rule of sheet.cssRules) rules.push(rule.cssText)
+					for (let rule of sheet.cssRules) rules.push(rule.cssText);
 
 					style.append(rules.join('\n'));
 				}
@@ -506,8 +506,8 @@ class Copy_With_Style {
 			for (let rule of attr_styles)
 				if (rule) {
 					const [n, v] = rule.split(':');
-					const N = n == undefined ? '' : n.trim();
-					const V = v == undefined ? '' : v.trim();
+					const N = n === undefined ? '' : n.trim();
+					const V = v === undefined ? '' : v.trim();
 					styles.push(N);
 				}
 		}
@@ -563,13 +563,13 @@ class Copy_With_Style {
 			if (this.debug) console.log(`copy event handler triggered!`)
 			// By default use the prepared content 
 			if (content === undefined) {
-				event.clipboardData.setData('text/html', this.HTML);
-				event.clipboardData.setData('text/plain', this.text);
+				event.clipboardData.setData("text/html", this.HTML);
+				event.clipboardData.setData("text/plain", this.text);
 				// But support injection of arbitrary content as well
 			} else if (typeof content === 'string' || content instanceof String) {
-				event.clipboardData.setData('text/plain', content);
+				event.clipboardData.setData("text/plain", content);
 			} else if (typeof content.toString === 'function') {
-				event.clipboardData.setData('text/plain', content.toString());
+				event.clipboardData.setData("text/plain", content.toString());
 			}
 			event.preventDefault();
 			document.removeEventListener('copy', bound_handler, true);
@@ -605,14 +605,14 @@ class Copy_With_Style {
 				// element. The mutatino handler will in that case ask the preparation to bail and
 				// restart one.
 				if (this.triggers.includes("observe")) {
-					if (this.debug) console.log(`Starting observer`);
+					if (this.debug) console.log("Starting observer");
 					this.#observe_element();
 				}
-				if (this.debug) console.log(`Starting preparation`);
+				if (this.debug) console.log("Starting preparation");
 				await this.prepare_copy();
 			}
 		}
-		if (this.debug) console.log(`Scheduling a copy preparation ...`);
+		if (this.debug) console.log("Scheduling a copy preparation ...");
 		this.button.disabled = true;
 		document.addEventListener('readystatechange', handler.bind(this));
 	}
@@ -764,7 +764,7 @@ class Copy_With_Style {
 	// 13 pixels wider for some reason. C'est la vie.   
 	#bar_width(progress_bar) {
 		const style = window.getComputedStyle(progress_bar);
-		return progress_bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+		return progress_bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
 	}
 
 	// A simple basename for matching stylesheets
