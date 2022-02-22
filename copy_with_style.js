@@ -550,9 +550,11 @@ class Copy_With_Style {
 		if (debug_class) debugger;
 
 		// Add the user styles we found
-		for (let r = 0; r < cs.length; r++)
+		for (let r = 0; r < cs.length; r++) {
+			if (this.styles_to_debug.includes(cs.item(r))) debugger;
 			if (css_matches.includes(cs.item(r)))
 				target_element.style[cs.item(r)] = cs.getPropertyValue(cs.item(r));
+		}
 	}
 
 	// Straight from: https://stackoverflow.com/questions/26336138/how-can-i-copy-to-clipboard-in-html5-without-using-flash/45352464#45352464
@@ -815,7 +817,7 @@ class Copy_With_Style {
 	#twig(element) {
 		let e = element
 		let twig = [e];
-		while (e.parentElement.children.length == 1) {
+		while (e.parentElement && e.parentElement.children.length == 1) {
 			e = e.parentElement;
 			twig.push(e);
 			if (e.parentElement === null) break; // We've reached the top!
