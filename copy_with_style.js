@@ -96,15 +96,21 @@ class Copy_With_Style {
 
 	// Optionally a list of CSS classes that, when having styles inlined will, when encountered
 	// trigger a debugger break (so you can examine the internals in the browser''s debugger)
-	// Will only trigger if a debugger is active of course. Pressing F12 in yoru browser will
+	// Will only trigger if a debugger is active of course. Pressing F12 in your browser will
 	// probably bring one up.
 	classes_to_debug = []; // "highlight_changes_on"
 
 	// Optionally a list of styles that, when having styles inlined will, when encountered
 	// trigger a debugger break (so you can examine the internals in the browser''s debugger)
-	// Will only trigger if a debugger is active of course. Pressing F12 in yoru browser will
+	// Will only trigger if a debugger is active of course. Pressing F12 in your browser will
 	// probably bring one up.
 	styles_to_debug = []; // "background-color";
+
+	// Optionally a list of tags that, when having styles inlined will, when encountered
+	// trigger a debugger break (so you can examine the internals in the browser''s debugger)
+	// Will only trigger if a debugger is active of course. Pressing F12 in your browser will
+	// probably bring one up.
+	tags_to_debug = []; // "canvas";
 
 	// The HTML and text strings (renditions) of element
 	HTML = "";
@@ -150,7 +156,8 @@ class Copy_With_Style {
 		log_text_to_console = false,
 		check_clone_integrity = false,
 		classes_to_debug = [],
-		styles_to_debug = []
+		styles_to_debug = [],
+		tags_to_debug = []
 	} = {}) {
 		this.button = button;
 		this.element = element;
@@ -175,6 +182,7 @@ class Copy_With_Style {
 		this.check_clone_integrity = check_clone_integrity;
 		this.classes_to_debug = classes_to_debug;
 		this.styles_to_debug = styles_to_debug;
+		this.tags_to_debug = tags_to_debug.map(name => name.toUpperCase()); // tagNames reported in JS are always Uppercase
 
 		if (this.debug) console.clear();
 		if (this.debug) console.log(`Configuring progress: ${progress instanceof HTMLElement}, ${progress.tagName}, ${button.parentElement.querySelector("progress")}, ${this.show_progress}`);
@@ -324,37 +332,48 @@ class Copy_With_Style {
 		}
 
 		this.#clone = this.element.cloneNode(true); // Clone the element we want to copy to the clipboard
+		
+		const source = this.element.querySelectorAll('*');
+		const target = this.#clone.querySelectorAll('*');
+		const pairs = this.#zip([Array.from(source), Array.from(target)]);
+		const nelements = pairs.length;
 
+		// Perform an integrity check on the two element lists
+		let cloned_well = true;
+		if (this.check_clone_integrity) {
+			for (let pair of pairs)
+				if (pair[0].outerHTML !== pair[1].outerHTML)
+					cloned_well = false;
+		}
+
+		if (this.log_performance) {
+			const done = performance.now();
+			const runtime = done - start;
+			const rate1 = runtime / nelements;
+			const rate2 = nelements / runtime * 1000;
+			console.log(`Cloned and prepared ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
+			start = performance.now()
+		}
+		
+		// Convert any CANVAS elements in the clone to IMG elements
+		for (let pair of pairs)
+			if (pair[0].tagName === "CANVAS") {
+				const DOM_canvas = pair[0];
+				const clone_canvas = pair[1];
+				const data = DOM_canvas.toDataURL(); 
+				const image = new Image(); image.src = data;
+				// Copy the canvas attributes to the image
+				Array.from(DOM_canvas.attributes).forEach(a => image.setAttribute(a.nodeName, a.nodeValue));
+				// Replace the canvas in the clone with the image
+				clone_canvas.parentNode.replaceChild(image, clone_canvas);
+			}
+		
+		
 		// create a wrapper (that we will try to copy)
 		const wrapper = document.createElement("div");
 		wrapper.id = 'copy_me_with_style';
 
-		let nelements = null;
-
 		if (this.mode == "attribute") {
-			const source = this.element.querySelectorAll('*');
-			const target = this.#clone.querySelectorAll('*');
-			const pairs = this.#zip([Array.from(source), Array.from(target)]);
-
-			nelements = pairs.length;
-
-			// Perform an integrity check on the two element lists
-			let cloned_well = true;
-			if (this.check_clone_integrity) {
-				for (pair of pairs)
-					if (pair[0].outerHTML !== pair[1].outerHTML)
-						cloned_well = false;
-			}
-
-			if (this.log_performance) {
-				const done = performance.now();
-				const runtime = done - start;
-				const rate1 = runtime / nelements;
-				const rate2 = nelements / runtime * 1000;
-				console.log(`Cloned and prepared ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
-				start = performance.now()
-			}
-
 			if (cloned_well) {
 				let defer = this.defer_to_UI;
 				let i = 0;
@@ -548,10 +567,11 @@ class Copy_With_Style {
 		}
 
 		if (debug_class) debugger;
+		if (debug_class && this.tags_to_debug.includes(source_element.tagName)) debugger; 
 
 		// Add the user styles we found
 		for (let r = 0; r < cs.length; r++) {
-			if (this.styles_to_debug.includes(cs.item(r))) debugger;
+			if (debug_class && this.styles_to_debug.includes(cs.item(r))) debugger;
 			if (css_matches.includes(cs.item(r)))
 				target_element.style[cs.item(r)] = cs.getPropertyValue(cs.item(r));
 		}
