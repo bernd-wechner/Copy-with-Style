@@ -25,6 +25,11 @@ class Copy_With_Style {
 	progress = null; // A progress element that is a sibling or child of the button by default but can be specified explicitly.
 	stylesheets = "inline";
 
+	// The <details> tag renders badly when inlined. Most mail readers show the summary AND details.
+	// So we might want to remplace the whole <details> tag with it's <summary> when inlining. Only
+	// relevant when mode == "attribute"
+	summarize_details = true;
+
 	// Show a progress bar if we can find one as a sibling or child of element
 	show_progress = true;
 
@@ -32,14 +37,14 @@ class Copy_With_Style {
 	// with the element or not. Matters little it's a simple div.'
 	copy_wrapper = true;
 
-	// Styling classes for the button. A supplie button is given these clases to communicate state of 
+	// Styling classes for the button. A supplie button is given these clases to communicate state of
 	// the preparation and copy.
 	class_button = null;
 	class_preparing = null;
 	class_ready = null;
 
 	// Element exclusion overrides and augmentations. These are all function that are called
-	// if defined and passed an HTML element as their sole argument. Thy must return true or 
+	// if defined and passed an HTML element as their sole argument. Thy must return true or
 	// false, true to exclude, false to keep.
 	//
 	// the extra_ pair are in addition tod efault implentations
@@ -137,6 +142,7 @@ class Copy_With_Style {
 		button,
 		element,
 		stylesheets = [],
+		summarize_details = true,
 		mode = "attribute",
 		defer = [50000, 0],
 		triggers = ["button"],
@@ -157,11 +163,12 @@ class Copy_With_Style {
 		check_clone_integrity = false,
 		classes_to_debug = [],
 		styles_to_debug = [],
-		tags_to_debug = []
+		tags_to_debug = [],
 	} = {}) {
 		this.button = button;
 		this.element = element;
 		this.stylesheets = stylesheets;
+		this.summarize_details = summarize_details;
 		this.mode = mode;
 		this.defer_to_UI = defer;
 		this.triggers = triggers;
@@ -192,7 +199,7 @@ class Copy_With_Style {
 		// If we're showing a progress bar we MUST defer to UI or it won't update
 		if (this.show_progress && this.progress)
 			if (this.defer_to_UI)
-				this.defer_to_UI[0] = 0;    // Force a deferral or progress bar won't update, butleave the frequency as specified 
+				this.defer_to_UI[0] = 0;    // Force a deferral or progress bar won't update, butleave the frequency as specified
 			else
 				this.defer_to_UI = [0, 0];  // Force deferral, and request optimised frequency
 
@@ -216,7 +223,7 @@ class Copy_With_Style {
 	}
 
 	async copy(content) {
-		// By default use the prepared content 
+		// By default use the prepared content
 		if (content instanceof MouseEvent || content === undefined) {
 			if (!this.#is_prepared) {
 				await this.#ready_to_prepare("copy");
@@ -270,7 +277,7 @@ class Copy_With_Style {
 	}
 
 	// If element take ssome time to get ready, (build the HTML for), any bulder can call .lock() before starting
-	// and then .prepare_copy_when_ready() to manage the copy button state nad appearance sensibly. 
+	// and then .prepare_copy_when_ready() to manage the copy button state nad appearance sensibly.
 	lock() {
 		this.#is_prepared = false;
 
@@ -280,8 +287,8 @@ class Copy_With_Style {
 	}
 
 	// Small failsafe entry point (a rnderer can call this and remain in place, if the trigger is changed at
-	// the place where Copy_With_Style is instantiated oto add or remove a button trigger this entry point 
-	/// can remain unchanged) 
+	// the place where Copy_With_Style is instantiated oto add or remove a button trigger this entry point
+	/// can remain unchanged)
 	async prepare_copy_when_ready_unless_button_bound(fingerprint = "no fingerprint") {
 		if (!this.triggers.includes("button")) this.prepare_copy_when_ready(fingerprint);
 	}
@@ -292,7 +299,7 @@ class Copy_With_Style {
 		async function prepare_the_copy() {
 			if (await this.#ready_to_prepare(fingerprint)) {
 				if (this.debug) console.log(`${fingerprint} Rendering is complete. Requesting prepare_copy() ... (this.#bail: ${this.#bail}, this.#bailed: ${this.#bailed})`);
-				this.prepare_copy(); // no need to await it, just let it run (and return, no drama) 
+				this.prepare_copy(); // no need to await it, just let it run (and return, no drama)
 			} else
 				if (this.debug) console.log(`${fingerprint} NOT ready to preapre!`);
 		}
@@ -332,7 +339,7 @@ class Copy_With_Style {
 		}
 
 		this.#clone = this.element.cloneNode(true); // Clone the element we want to copy to the clipboard
-		
+
 		const source = this.element.querySelectorAll('*');
 		const target = this.#clone.querySelectorAll('*');
 		const pairs = this.#zip([Array.from(source), Array.from(target)]);
@@ -354,21 +361,21 @@ class Copy_With_Style {
 			console.log(`Cloned and prepared ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
 			start = performance.now()
 		}
-		
+
 		// Convert any CANVAS elements in the clone to IMG elements
 		for (let pair of pairs)
 			if (pair[0].tagName === "CANVAS") {
 				const DOM_canvas = pair[0];
 				const clone_canvas = pair[1];
-				const data = DOM_canvas.toDataURL(); 
+				const data = DOM_canvas.toDataURL();
 				const image = new Image(); image.src = data;
 				// Copy the canvas attributes to the image
 				Array.from(DOM_canvas.attributes).forEach(a => image.setAttribute(a.nodeName, a.nodeValue));
 				// Replace the canvas in the clone with the image
 				clone_canvas.parentNode.replaceChild(image, clone_canvas);
 			}
-		
-		
+
+
 		// create a wrapper (that we will try to copy)
 		const wrapper = document.createElement("div");
 		wrapper.id = 'copy_me_with_style';
@@ -439,10 +446,10 @@ class Copy_With_Style {
 						if (this.#deep_exclude_from_copy(s)) t.remove();
 					}
 
-					// Remove and shallow exclusions next. This is tricky and demands a bottom up
-					// pruning. A linear or top down approach can lead to trouble as the element 
-					// tree changes. Bottom up ensures that when a shallow exclusion is pruned 
-					// it's children remain grafted to the parent. 
+					// Remove any shallow exclusions next. This is tricky and demands a bottom up
+					// pruning. A linear or top down approach can lead to trouble as the element
+					// tree changes. Bottom up ensures that when a shallow exclusion is pruned
+					// it's children remain grafted to the parent.
 					this.#prune_clone();
 				}
 
@@ -508,7 +515,7 @@ class Copy_With_Style {
 
 	/*****************************************************************************************
 	Private Methods
-	
+
 	https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields
 	******************************************************************************************/
 
@@ -567,11 +574,11 @@ class Copy_With_Style {
 		}
 
 		if (debug_class) debugger;
-		if (debug_class && this.tags_to_debug.includes(source_element.tagName)) debugger; 
+		if (this.tags_to_debug.includes(source_element.tagName)) debugger;
 
 		// Add the user styles we found
 		for (let r = 0; r < cs.length; r++) {
-			if (debug_class && this.styles_to_debug.includes(cs.item(r))) debugger;
+			if (this.styles_to_debug.includes(cs.item(r))) debugger;
 			if (css_matches.includes(cs.item(r)))
 				target_element.style[cs.item(r)] = cs.getPropertyValue(cs.item(r));
 		}
@@ -583,7 +590,7 @@ class Copy_With_Style {
 
 		function handler(event) {
 			if (this.debug) console.log(`copy event handler triggered!`)
-			// By default use the prepared content 
+			// By default use the prepared content
 			if (content === undefined) {
 				event.clipboardData.setData("text/html", this.HTML);
 				event.clipboardData.setData("text/plain", this.text);
@@ -605,11 +612,11 @@ class Copy_With_Style {
 			// Chrome based broswers just fail silentlyon same condition. What it means is the the button handler took too long inlining styles
 			// and the copy command has been disabled.Browsers stipulate that any event handler executing copy, do so within a certain time threshold.
 			// Intended to protect users form Javascript doing random stuff to the clipboard witout a users knowledge, Not an unreasonable approach
-			// which arguest that to be sure the copy command is auysers intent the time between executing it and starting the click event handler 
-			// should not exceed some threshold. 
-			// 
+			// which arguest that to be sure the copy command is auysers intent the time between executing it and starting the click event handler
+			// should not exceed some threshold.
+			//
 			// In practice this never happens unless the elemnet is very large and inlining take s a long time.  But if it does, we
-			// will simple flag that the copy is ready and invote (through the styling choices) the user to click it again to do an 
+			// will simple flag that the copy is ready and invote (through the styling choices) the user to click it again to do an
 			// actual copy. prepare_copy() will have style the button alread appropriately and set this.#is_prepared. So  we have
 			// naught to do here and can pass silently.
 			if (this.debug) console.log(`Copy command looks to have timed-out.`)
@@ -704,28 +711,28 @@ class Copy_With_Style {
 	async #mutation_handler(mutations) {
 		const fingerprint = performance.now();
 		if (this.debug) console.log(`${fingerprint} mutation: readystate is ${document.readyState}`);
-		this.invalidate(); // Invalidate any existing preparation 
+		this.invalidate(); // Invalidate any existing preparation
 		if (this.triggers.includes("observe")) // If a preparation trigger is bound to the observaion, prepare when ready.
 			self.prepare_copy_when_ready(fingerprint);
 	}
 
 
 	/*****************************************************************************************
-	Element exclusion defintions (elements to exclude from the copy when inlining styles). 
+	Element exclusion defintions (elements to exclude from the copy when inlining styles).
 	There are two types:
 
-	deep exclusion: meaning we remove the matched element and all its children. This is 
-					intended to apply to hidden elements. Ther eis no need to inclde them 
+	deep exclusion: meaning we remove the matched element and all its children. This is
+					intended to apply to hidden elements. There is no need to include them
 					in a copy, they just consume space on the clipboard and where you paste
-					to, but are not visible. 
-					
+					to, but are not visible.
+
 	shallow exclusion: Only the element is excluded, its children are grafted to its parent.
-					   This is intended for useless wrappers. The two standard cases 
-					   implemented are: A tags that link to local site URLS (those starting 
-					   with /) - such links don't reolve in any pasted context. The source 
-					   element can always write them with full URLS if wishing to see them 
-					   copied. and DIV tags with the "tooltip" class. Reserved calass name 
-					   for tooltip implemetations that wrap text thatbhas a tooltip in such
+					   This is intended for useless wrappers. The two standard cases
+					   implemented are: A tags that link to local site URLS (those starting
+					   with /) - such links don't reolve in any pasted context. The source
+					   element can always write them with full URLS if wishing to see them
+					   copied. and DIV tags with the "tooltip" class. Reserved class name
+					   for tooltip implementations that wrap text that has a tooltip in such
 					   a DIV.
 	******************************************************************************************/
 
@@ -742,16 +749,22 @@ class Copy_With_Style {
 		}
 	}
 
-	// We also drop any anchor (A) tags that link to a local URL (one begining with /) as these 
-	// lose meaning in any pasted context. If they are desired it's the source element need only 
+	// We also drop any anchor (A) tags that link to a local URL (one begining with /) as these
+	// lose meaning in any pasted context. If they are desired it's the source element need only
 	// prepare itself nby including the https://mysite/ prefix to them so they have meaning in a
-	// pasted context.
+	// pasted context. And tooltip divs and details/sumary tags are also handled as shallow
+	// exclusions.
 	#shallow_exclude_from_copy(element) {
 		if (typeof this.shallow_exclusions === 'function')
 			return this.shallow_exclusions(element);
 		else {
+			// Default shallow exclusions:
+			//   All internal links (the A tag is removed)
+			//   All tooltip divs (the actual tooltip is a deep exclusion as it is hidden)
+			//   All details text if requested - this one is special losing all content bar the summary.
 			let exclude = (element.nodeName === "A" && element.getAttribute("href").startsWith("/"))
-				|| (element.nodeName === "DIV" && element.classList.contains("tooltip"));
+				|| (element.nodeName === "DIV" && element.classList.contains("tooltip"))
+				|| (this.summarize_details && element.nodeName === "DETAILS");
 			if (typeof this.extra_shallow_exclusions === 'function')
 				exclude = exclude || this.extra_shallow_exclusions(element);
 			return exclude;
@@ -763,7 +776,7 @@ class Copy_With_Style {
 	}
 
 	/*****************************************************************************************
-	Simple support functions 
+	Simple support functions
 	******************************************************************************************/
 
 	// This is a Javascript oddity.
@@ -782,8 +795,8 @@ class Copy_With_Style {
 
 	// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/clientWidth
 	// On one cross check taking screen grabs and measurig the borgress bar and comparing against this
-	// Firefox reports correctly and Chromium reports the same number as Firefox, but renders another 
-	// 13 pixels wider for some reason. C'est la vie.   
+	// Firefox reports correctly and Chromium reports the same number as Firefox, but renders another
+	// 13 pixels wider for some reason. C'est la vie.
 	#bar_width(progress_bar) {
 		const style = window.getComputedStyle(progress_bar);
 		return progress_bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
@@ -803,9 +816,9 @@ class Copy_With_Style {
 	#zip = rows => rows[0].map((_, c) => rows.map(row => row[c]));
 
 	/*****************************************************************************************
-	Bottom up tree pruning methods. 
+	Bottom up tree pruning methods.
 
-	We need to walk bottom up to reliably remove the hallow excludes. These are like DIV 
+	We need to walk bottom up to reliably remove the hallow excludes. These are like DIV
 	wrappers and such that we want to remove. They are identidfied by:
 
 	this.#shallow_exclude_from_copy
@@ -813,10 +826,10 @@ class Copy_With_Style {
 	and to remove them we set the outerHTML= innerHTML. This is most cleanly and safely done
 	from the bottom up, the leaves of the tree.
 
-	Walking up from the bottom is non trivial, but centres on identifying leaves and the twigs 
+	Walking up from the bottom is non trivial, but centres on identifying leaves and the twigs
 	that they are attched to. Leaves are nominally those elements with no children and twigs
-	are the list of Elements walimg up to (and not including) the first junction. If we process 
-	all those from leaf to junction, then the new leaves are thos junctions and we repeat 
+	are the list of Elements walimg up to (and not including) the first junction. If we process
+	all those from leaf to junction, then the new leaves are thos junctions and we repeat
 	recurisively until we are down to one leaf then none.
 	******************************************************************************************/
 
@@ -832,7 +845,7 @@ class Copy_With_Style {
 		}
 	}
 
-	// return the twig that an element is on, 
+	// return the twig that an element is on,
 	// being the list of nodes from element up to the first junction
 	#twig(element) {
 		let e = element
@@ -856,7 +869,15 @@ class Copy_With_Style {
 		for (let twig of twigs)
 			for (let element of twig)
 				if (this.#shallow_exclude_from_copy(element))
-					element.outerHTML = element.innerHTML;
+					{	// A shallow exclclusion of DETAILS is special, only SUMMARY remains.
+						if (element.nodeName === "DETAILS") {
+							const summary = element.querySelector("SUMMARY");
+							element.replaceWith(summary);
+						// Everything else is shallow excluded by keeping all the children
+						} else {
+							element.replaceWith(...element.childNodes)
+						}
+					}
 
 		// return the new leaves (considerig all these twigs pruned)
 		let leaves = [];
