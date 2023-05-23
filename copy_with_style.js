@@ -7,7 +7,7 @@
  * called ""inlining" styles.
  *
  * Inlining styles (applying them as a "style" attribute one each element) is expensive (slow) and produces more
- * data, conceivably much more data than not inlining them (providing them via a <style> tag), but produuces a copy
+ * data, conceivably much more data than not inlining them (providing them via a <style> tag), but produces a copy
  * that can reliably be emailed. Most email clients today (2021) have patchy or no support for the style tag.
  * Conversely most email clients respect and render inline style attributes faithfully.
  *
@@ -26,7 +26,7 @@ class Copy_With_Style {
 	stylesheets = "inline";
 
 	// The <details> tag renders badly when inlined. Most mail readers show the summary AND details.
-	// So we might want to remplace the whole <details> tag with it's <summary> when inlining. Only
+	// So we might want to replace the whole <details> tag with it's <summary> when inlining. Only
 	// relevant when mode == "attribute"
 	summarize_details = true;
 
@@ -37,7 +37,7 @@ class Copy_With_Style {
 	// with the element or not. Matters little it's a simple div.'
 	copy_wrapper = true;
 
-	// Styling classes for the button. A supplie button is given these clases to communicate state of
+	// Styling classes for the button. A supplied button is given these classes to communicate state of
 	// the preparation and copy.
 	class_button = null;
 	class_preparing = null;
@@ -47,17 +47,17 @@ class Copy_With_Style {
 	// if defined and passed an HTML element as their sole argument. Thy must return true or
 	// false, true to exclude, false to keep.
 	//
-	// the extra_ pair are in addition tod efault implentations
+	// the extra_pair are in addition to default implementations
 	// the other two replace the default implementations
 	//
-	// Deep exclusions eclude the element and all its children.
-	// Shallow exclusion exlcude the element and graft its chidlren onto its parent.
+	// Deep exclusions exclude the element and all its children.
+	// Shallow exclusion exclude the element and graft its children onto its parent.
 	deep_exclusions = null;
 	shallow_exclusions = null;
 	extra_deep_exclusions = null;
 	extra_shallow_exclusions = null;
 
-	// If we are inlining styles on a huuuge element we may wish to permit a responsive UI while we're inlining it.
+	// If we are inlining styles on a huge element we may wish to permit a responsive UI while we're inlining it.
 	// This will slow down inlining enormously though, and may never have a net reward. In one trial Chrome processed
 	// 3000 elements per second without deferal to UI (locking the UI), and 200 with deferal to the UI a 15. In any
 	// case at 3000 elements per second for this to cost more than say a tolerable 2 second delay in production the
@@ -69,21 +69,21 @@ class Copy_With_Style {
 	//  a list of two ints describing [threshold, frequency]
 	// 		where we defer to UI only if there are more than threshold elements
 	//		and only after batches of "frequency" elements are inlined.
-	//      a frequency of 0 request optimisation (i.e. number of elements per progress bar pixel)
+	//      a frequency of 0 request optimization (i.e. number of elements per progress bar pixel)
 	defer_to_UI = false;
 
 	// Copying is divided into two stages to cope with extremely large elements if need be.
-	//    1. Prepration:  this.prepare_copy()
-	//    2. Copying the preapred strinsg to the clipboard:  this.to_clipboard()
+	//    1. Preparation:  this.prepare_copy()
+	//    2. Copying the prepared string to the clipboard:  this.to_clipboard()
 	//
 	// A preparation can be triggered by any of these events:
 	//
 	// "button"     this.copy() will be attached to the button provided in the constructor else this.to_clipboard() will be.
-	// "schedule"   this.schedule_preparation() is called on creation so a prepation is triggered after the DOM is fully rendered
-	// "observe"	an observer will be attached to element and when it sees anyc hange, will call this.prepare_copy()
+	// "schedule"   this.schedule_preparation() is called on creation so a preparation is triggered after the DOM is fully rendered
+	// "observe"	an observer will be attached to element and when it sees any change, will call this.prepare_copy()
 	//
-	// triggers is a list the events that shoudl trigger a preaparation.
-	// An empty list means you need to call this.prepare_copy() expicitly or this.copy() - which calls this.prepare_copy().
+	// triggers is a list the events that should trigger a preparation.
+	// An empty list means you need to call this.prepare_copy() explicitly or this.copy() - which calls this.prepare_copy().
 	triggers = ["button"];
 
 	// If true will watch the element and invalidate any preparations if it changes.
@@ -121,7 +121,7 @@ class Copy_With_Style {
 	HTML = "";
 	text = "";
 
-	// If true log the HTML or text rendition prepared, and the HTML or text put onto the clpboard to the console, for diagnostic purposes.
+	// If true log the HTML or text rendition prepared, and the HTML or text put onto the clipboard to the console, for diagnostic purposes.
 	log_HTML_to_console = false;
 	log_text_to_console = false;
 
@@ -175,33 +175,42 @@ class Copy_With_Style {
 		this.observe = observe;
 		this.show_progress = progress ? true : false;
 		this.copy_wrapper = copy_wrapper;
-		this.class_button = class_button,
-		this.class_preparing = class_preparing,
-		this.class_ready = class_ready,
-		this.deep_exclusions = deep_exclusions,
-		this.shallow_exclusions = shallow_exclusions,
-		this.extra_deep_exclusions = extra_deep_exclusions,
-		this.extra_shallow_exclusions = extra_shallow_exclusions,
-		this.debug = debug;
+		(this.class_button = class_button),
+			(this.class_preparing = class_preparing),
+			(this.class_ready = class_ready),
+			(this.deep_exclusions = deep_exclusions),
+			(this.shallow_exclusions = shallow_exclusions),
+			(this.extra_deep_exclusions = extra_deep_exclusions),
+			(this.extra_shallow_exclusions = extra_shallow_exclusions),
+			(this.debug = debug);
 		this.log_performance = log_performance;
 		this.log_HTML_to_console = log_HTML_to_console;
 		this.log_text_to_console = log_text_to_console;
 		this.check_clone_integrity = check_clone_integrity;
 		this.classes_to_debug = classes_to_debug;
 		this.styles_to_debug = styles_to_debug;
-		this.tags_to_debug = tags_to_debug.map(name => name.toUpperCase()); // tagNames reported in JS are always Uppercase
+		this.tags_to_debug = tags_to_debug.map((name) => name.toUpperCase()); // tagNames reported in JS are always Uppercase
 
 		if (this.debug) console.clear();
-		if (this.debug) console.log(`Configuring progress: ${progress instanceof HTMLElement}, ${progress.tagName}, ${button.parentElement.querySelector("progress")}, ${this.show_progress}`);
+		if (this.debug)
+			console.log(
+				`Configuring progress: ${progress instanceof HTMLElement}, ${
+					progress.tagName
+				}, ${button.parentElement.querySelector("progress")}, ${
+					this.show_progress
+				}`
+			);
 
-		this.progress = (progress instanceof HTMLElement && progress.tagName === "PROGRESS") ? progress : button.parentElement.querySelector("progress");
+		this.progress =
+			progress instanceof HTMLElement && progress.tagName === "PROGRESS"
+				? progress
+				: button.parentElement.querySelector("progress");
 
 		// If we're showing a progress bar we MUST defer to UI or it won't update
 		if (this.show_progress && this.progress)
 			if (this.defer_to_UI)
-				this.defer_to_UI[0] = 0;    // Force a deferral or progress bar won't update, butleave the frequency as specified
-			else
-				this.defer_to_UI = [0, 0];  // Force deferral, and request optimised frequency
+				this.defer_to_UI[0] = 0; // Force a deferral or progress bar won't update, but leave the frequency as specified
+			else this.defer_to_UI = [0, 0]; // Force deferral, and request optimized frequency
 
 		this.HTML = null;
 		this.text = null;
@@ -210,13 +219,11 @@ class Copy_With_Style {
 		this.button.classList.add(this.class_button); // The default styling class
 		if (this.triggers.includes("button"))
 			button.addEventListener("click", this.copy.bind(this));
-		else
-			button.addEventListener("click", this.to_clipboard.bind(this));
+		else button.addEventListener("click", this.to_clipboard.bind(this));
 
 		if (this.debug) console.log(`Configuring schedules: ${triggers}`);
-		// This sechedules an observation as well if need but only after the DOM is completely rendered.
-		if (this.triggers.includes("schedule"))
-			this.#schedule_preparation();
+		// This schedules an observation as well if need but only after the DOM is completely rendered.
+		if (this.triggers.includes("schedule")) this.#schedule_preparation();
 		// Only needed if not scheduling, we explicitly schedule observation to start when the DOM has finished rendering.
 		else if (this.triggers.includes("observe") || this.observe)
 			this.#schedule_observation();
@@ -239,7 +246,10 @@ class Copy_With_Style {
 	}
 
 	async to_clipboard() {
-		if (this.debug) console.log(`to_clipboard started: is_prepared? ${this.#is_prepared}`)
+		if (this.debug)
+			console.log(
+				`to_clipboard started: is_prepared? ${this.#is_prepared}`
+			);
 		//if (!this.#is_prepared) await this.prepare_copy();
 		this.button.disabled = true;
 
@@ -256,12 +266,12 @@ class Copy_With_Style {
 		await this.#copy_to_clipboard();
 
 		this.button.disabled = false;
-		if (this.debug) console.log(`to_clipboard done`)
+		if (this.debug) console.log(`to_clipboard done`);
 	}
 
 	// An internal bail request. Because prepare_copy() defers to UI maintaining an interactive UI a user
-	// can make changes to element meaning we have to start the perparation again, i.e. bail the one
-	// that's running and start again. These flags effect that interation.
+	// can make changes to element meaning we have to start the preparation again, i.e. bail the one
+	// that's running and start again. These flags effect that interaction.
 	#is_being_prepared = false; // Set when prepare_copy starts.
 	#is_prepared = false; // Set when prepare_copy is finished (to completion and has prepared this.HTML and this.text)
 	#bail = false; // Set to request a bail
@@ -276,39 +286,48 @@ class Copy_With_Style {
 		this.button.classList.remove(this.class_ready);
 	}
 
-	// If element take ssome time to get ready, (build the HTML for), any bulder can call .lock() before starting
+	// If element take some time to get ready, (build the HTML for), any bulder can call .lock() before starting
 	// and then .prepare_copy_when_ready() to manage the copy button state nad appearance sensibly.
 	lock() {
 		this.#is_prepared = false;
 
-		// We disable the copy button, but only if preapre_copy() is not button triggered. If it is,
-		// we need the button enabnled to trigger a preparation.
+		// We disable the copy button, but only if prepare_copy() is not button triggered. If it is,
+		// we need the button enabled to trigger a preparation.
 		if (!this.triggers.includes("button")) this.button.disabled = true;
 	}
 
-	// Small failsafe entry point (a rnderer can call this and remain in place, if the trigger is changed at
+	// Small failsafe entry point (a renderer can call this and remain in place, if the trigger is changed at
 	// the place where Copy_With_Style is instantiated oto add or remove a button trigger this entry point
 	/// can remain unchanged)
-	async prepare_copy_when_ready_unless_button_bound(fingerprint = "no fingerprint") {
-		if (!this.triggers.includes("button")) this.prepare_copy_when_ready(fingerprint);
+	async prepare_copy_when_ready_unless_button_bound(
+		fingerprint = "no fingerprint"
+	) {
+		if (!this.triggers.includes("button"))
+			this.prepare_copy_when_ready(fingerprint);
 	}
 
 	// self.prepare_copy with readiness checks and security.
-	// Optionial fingerprint for debug logging (intended only to identify event handlers that land here uniquely)
+	// Optional fingerprint for debug logging (intended only to identify event handlers that land here uniquely)
 	async prepare_copy_when_ready(fingerprint = "no fingerprint") {
 		async function prepare_the_copy() {
 			if (await this.#ready_to_prepare(fingerprint)) {
-				if (this.debug) console.log(`${fingerprint} Rendering is complete. Requesting prepare_copy() ... (this.#bail: ${this.#bail}, this.#bailed: ${this.#bailed})`);
+				if (this.debug)
+					console.log(
+						`${fingerprint} Rendering is complete. Requesting prepare_copy() ... (this.#bail: ${
+							this.#bail
+						}, this.#bailed: ${this.#bailed})`
+					);
 				this.prepare_copy(); // no need to await it, just let it run (and return, no drama)
-			} else
-				if (this.debug) console.log(`${fingerprint} NOT ready to preapre!`);
+			} else if (this.debug)
+				console.log(`${fingerprint} NOT ready to prepare!`);
 		}
 
 		function schedule_prepare_the_copy() {
 			setTimeout(prepare_the_copy.bind(this));
 		}
 
-		if (this.debug) console.log(`${fingerprint} Waiting for render to complete ...`);
+		if (this.debug)
+			console.log(`${fingerprint} Waiting for render to complete ...`);
 		requestAnimationFrame(schedule_prepare_the_copy.bind(this));
 	}
 
@@ -322,11 +341,14 @@ class Copy_With_Style {
 		if (this.debug) console.log(`prepare_copy started: ${element.id}`);
 		let start = performance.now();
 		this.#is_being_prepared = true;
-		this.button.disabled = this.observe; // disable it if we are observince element for changes, else leave it enabled to restart a preparation.
+		this.button.disabled = this.observe; // disable it if we are observing element for changes, else leave it enabled to restart a preparation.
 		this.button.classList.add(this.class_preparing);
 		await this.#defer_to_UI(); // Allow the button to render disabled
 
-		if (this.debug) console.log(`Preparing progress bar: ${this.progress}, ${this.show_progress}`);
+		if (this.debug)
+			console.log(
+				`Preparing progress bar: ${this.progress}, ${this.show_progress}`
+			);
 		if (this.progress) {
 			if (this.show_progress) {
 				if (this.debug) console.log("Enabling progress bar!");
@@ -340,8 +362,8 @@ class Copy_With_Style {
 
 		this.#clone = this.element.cloneNode(true); // Clone the element we want to copy to the clipboard
 
-		const source = this.element.querySelectorAll('*');
-		const target = this.#clone.querySelectorAll('*');
+		const source = this.element.querySelectorAll("*");
+		const target = this.#clone.querySelectorAll("*");
 		const pairs = this.#zip([Array.from(source), Array.from(target)]);
 		const nelements = pairs.length;
 
@@ -357,9 +379,11 @@ class Copy_With_Style {
 			const done = performance.now();
 			const runtime = done - start;
 			const rate1 = runtime / nelements;
-			const rate2 = nelements / runtime * 1000;
-			console.log(`Cloned and prepared ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
-			start = performance.now()
+			const rate2 = (nelements / runtime) * 1000;
+			console.log(
+				`Cloned and prepared ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`
+			);
+			start = performance.now();
 		}
 
 		// Convert any CANVAS elements in the clone to IMG elements
@@ -368,17 +392,19 @@ class Copy_With_Style {
 				const DOM_canvas = pair[0];
 				const clone_canvas = pair[1];
 				const data = DOM_canvas.toDataURL();
-				const image = new Image(); image.src = data;
+				const image = new Image();
+				image.src = data;
 				// Copy the canvas attributes to the image
-				Array.from(DOM_canvas.attributes).forEach(a => image.setAttribute(a.nodeName, a.nodeValue));
+				Array.from(DOM_canvas.attributes).forEach((a) =>
+					image.setAttribute(a.nodeName, a.nodeValue)
+				);
 				// Replace the canvas in the clone with the image
 				clone_canvas.parentNode.replaceChild(image, clone_canvas);
 			}
 
-
 		// create a wrapper (that we will try to copy)
 		const wrapper = document.createElement("div");
-		wrapper.id = 'copy_me_with_style';
+		wrapper.id = "copy_me_with_style";
 
 		if (this.mode == "attribute") {
 			if (cloned_well) {
@@ -388,29 +414,40 @@ class Copy_With_Style {
 				if (this.show_progress && this.progress) {
 					this.progress.max = nelements;
 					await this.#defer_to_UI();
-					// If frequency is 0, optimise it (find how many elements per pixel in the bar and don't refresh more often than that)
+					// If frequency is 0, optimize it (find how many elements per pixel in the bar and don't refresh more often than that)
 					if (defer[1] === 0) {
 						const bar_width = this.#bar_width(this.progress);
 						defer[1] = Math.floor(nelements / bar_width);
-						if (this.debug) console.log(`Optimised UI deferral: [${defer}] by spreading ${nelements} elements over ${bar_width} pixels of progress bar.`);
+						if (this.debug)
+							console.log(
+								`Optimized UI deferral: [${defer}] by spreading ${nelements} elements over ${bar_width} pixels of progress bar.`
+							);
 					}
 				} else {
-					// If frequency is 0, use a default, empirically optimised value
+					// If frequency is 0, use a default, empirically optimized value
 					if (defer[1] === 0) {
 						defer[1] = 1000;
-						if (this.debug) console.log(`Optimised UI deferral: [${defer}] using a default, empirically opimised frequency.`);
+						if (this.debug)
+							console.log(
+								`Optimize UI deferral: [${defer}] using a default, empirically optimized frequency.`
+							);
 					}
 				}
 
-				if (this.debug) console.log(`UI deferral policy: [${defer}]. Now inlining styles for ${nelements} elements.`);
+				if (this.debug)
+					console.log(
+						`UI deferral policy: [${defer}]. Now inlining styles for ${nelements} elements.`
+					);
 
 				if (this.log_performance) {
 					const done = performance.now();
 					const runtime = done - start;
 					const rate1 = runtime / nelements;
-					const rate2 = nelements / runtime * 1000;
-					console.log(`Inlined styles on ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
-					start = performance.now()
+					const rate2 = (nelements / runtime) * 1000;
+					console.log(
+						`Inlined styles on ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`
+					);
+					start = performance.now();
 				}
 
 				for (let pair of pairs) {
@@ -418,8 +455,16 @@ class Copy_With_Style {
 						await this.#inline_style(pair[0], pair[1]);
 						i++;
 					}
-					if (this.show_progress && this.progress) this.progress.value = i;
-					if (defer && (typeof (defer) === "boolean" || (Array.isArray(defer) && defer.length === 2 && nelements > defer[0] && i % defer[1] === 0)))
+					if (this.show_progress && this.progress)
+						this.progress.value = i;
+					if (
+						defer &&
+						(typeof defer === "boolean" ||
+							(Array.isArray(defer) &&
+								defer.length === 2 &&
+								nelements > defer[0] &&
+								i % defer[1] === 0))
+					)
 						await this.#defer_to_UI();
 					if (this.#bail) {
 						if (this.debug) console.log("Bailing ...");
@@ -431,9 +476,11 @@ class Copy_With_Style {
 					const done = performance.now();
 					const runtime = done - start;
 					const rate1 = runtime / nelements;
-					const rate2 = nelements / runtime * 1000;
-					console.log(`Inlined styles on ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
-					start = performance.now()
+					const rate2 = (nelements / runtime) * 1000;
+					console.log(
+						`Inlined styles on ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`
+					);
+					start = performance.now();
 				}
 
 				if (!this.#bail) {
@@ -457,19 +504,25 @@ class Copy_With_Style {
 					const done = performance.now();
 					const runtime = done - start;
 					const rate1 = runtime / nelements;
-					const rate2 = nelements / runtime * 1000;
-					console.log(`Removed hidden elements from ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`)
-					start = performance.now()
+					const rate2 = (nelements / runtime) * 1000;
+					console.log(
+						`Removed hidden elements from ${nelements.toLocaleString()} elements in ${runtime.toLocaleString()} ms, for ${rate1.toLocaleString()} ms/element or ${rate2.toLocaleString()} elements/s`
+					);
+					start = performance.now();
 				}
 			}
 		} else if (this.mode == "tag") {
 			const style = document.createElement("style");
 			for (let sheet of document.styleSheets) {
-				if (sheet.href && (sheets.length == 0 || sheets.includes(this.#basename(sheet.href)))) {
+				if (
+					sheet.href &&
+					(sheets.length == 0 ||
+						sheets.includes(this.#basename(sheet.href)))
+				) {
 					let rules = [];
 					for (let rule of sheet.cssRules) rules.push(rule.cssText);
 
-					style.append(rules.join('\n'));
+					style.append(rules.join("\n"));
 				}
 			}
 
@@ -481,9 +534,11 @@ class Copy_With_Style {
 			wrapper.append(this.#clone);
 
 			// Grab the HTML
-			this.HTML = this.copy_wrapper ? wrapper.outerHTML : wrapper.innerHTML;
+			this.HTML = this.copy_wrapper
+				? wrapper.outerHTML
+				: wrapper.innerHTML;
 
-			// Grab the Text. Chrome provides innerText and outertext. Firefox only innerText. Both look the
+			// Grab the Text. Chrome provides innerText and outerText. Firefox only innerText. Both look the
 			// same on chrome to me.
 			this.text = element.innerText;
 
@@ -509,8 +564,15 @@ class Copy_With_Style {
 			this.#bail = false;
 			this.#bailed = true;
 			if (this.debug) console.log("Bailed ...");
-		};
-		if (this.debug) console.log(`prepare_copy finished: ${element.id}, produced: ${this.HTML ? this.HTML.length : 0} characters of HTML amd ${this.text ? this.text.length : 0} characters of text.`);
+		}
+		if (this.debug)
+			console.log(
+				`prepare_copy finished: ${element.id}, produced: ${
+					this.HTML ? this.HTML.length : 0
+				} characters of HTML amd ${
+					this.text ? this.text.length : 0
+				} characters of text.`
+			);
 	}
 
 	/*****************************************************************************************
@@ -520,7 +582,7 @@ class Copy_With_Style {
 	******************************************************************************************/
 
 	// S.B.'s solution for finding CSS rules that match a given element.
-	//		See: https://stackoverflow.com/a/22638396/4002633
+	// See: https://stackoverflow.com/a/22638396/4002633
 	// Made more specific to finding the styles that these CSS rules impact.
 	async #CSS_styles(el, sheets = this.stylesheets) {
 		let styles = [];
@@ -528,32 +590,39 @@ class Copy_With_Style {
 		// First get the style attribute
 		const style_attr = el.getAttribute("style");
 		if (style_attr) {
-			const attr_styles = style_attr.split(';');
+			const attr_styles = style_attr.split(";");
 			for (let rule of attr_styles)
 				if (rule) {
-					const [n, v] = rule.split(':');
-					const N = n === undefined ? '' : n.trim();
-					const V = v === undefined ? '' : v.trim();
+					const [n, v] = rule.split(":");
+					const N = n === undefined ? "" : n.trim();
+					const V = v === undefined ? "" : v.trim();
 					styles.push(N);
 				}
 		}
 
 		// Then match the class attribute defined styles
 		for (let sheet of document.styleSheets) {
-			if (sheet.href && (sheets.length == 0 || sheets.includes(this.#basename(sheet.href))))
+			if (
+				sheet.href &&
+				(sheets.length == 0 ||
+					sheets.includes(this.#basename(sheet.href)))
+			)
 				try {
 					for (let rule of sheet.cssRules) {
 						if (el.matches(rule.selectorText)) {
-							const new_styles = Array.from(rule.style).filter(s => !styles.includes(s));
+							const new_styles = Array.from(rule.style).filter(
+								(s) => !styles.includes(s)
+							);
 							styles.push(...new_styles);
 						}
 					}
-				}
-				catch (err) {
+				} catch (err) {
 					// CORS errors land here
 					// To avoid them, make sure on cross origin (CDN) style sheet links to include
-					// 		crossorigin="anonymous" referrerpolicy="no-referrer"
-					console.log(`Failed to get rules from: ${sheet.href}\n${err}`)
+					// 		cross-origin="anonymous" referrer-policy="no-referrer"
+					console.log(
+						`Failed to get rules from: ${sheet.href}\n${err}`
+					);
 				}
 		}
 
@@ -580,7 +649,9 @@ class Copy_With_Style {
 		for (let r = 0; r < cs.length; r++) {
 			if (this.styles_to_debug.includes(cs.item(r))) debugger;
 			if (css_matches.includes(cs.item(r)))
-				target_element.style[cs.item(r)] = cs.getPropertyValue(cs.item(r));
+				target_element.style[cs.item(r)] = cs.getPropertyValue(
+					cs.item(r)
+				);
 		}
 	}
 
@@ -589,49 +660,64 @@ class Copy_With_Style {
 		const bound_handler = handler.bind(this);
 
 		function handler(event) {
-			if (this.debug) console.log(`copy event handler triggered!`)
+			if (this.debug) console.log(`copy event handler triggered!`);
 			// By default use the prepared content
 			if (content === undefined) {
 				event.clipboardData.setData("text/html", this.HTML);
 				event.clipboardData.setData("text/plain", this.text);
 				// But support injection of arbitrary content as well
-			} else if (typeof content === 'string' || content instanceof String) {
+			} else if (
+				typeof content === "string" ||
+				content instanceof String
+			) {
 				event.clipboardData.setData("text/plain", content);
-			} else if (typeof content.toString === 'function') {
+			} else if (typeof content.toString === "function") {
 				event.clipboardData.setData("text/plain", content.toString());
 			}
 			event.preventDefault();
-			document.removeEventListener('copy', bound_handler, true);
+			document.removeEventListener("copy", bound_handler, true);
 			this.copied = true;
 		}
 
-		document.addEventListener('copy', bound_handler, true);
-		if (!document.execCommand('copy')) {
+		document.addEventListener("copy", bound_handler, true);
+		if (!document.execCommand("copy")) {
 			// The only reason currently know for failure is when Firefox issues this warning:
 			// 		document.execCommand(‘cut’/‘copy’) was denied because it was not called from inside a short running user-generated event handler.
-			// Chrome based broswers just fail silentlyon same condition. What it means is the the button handler took too long inlining styles
+			// Chrome based browsers just fail silently same condition. What it means is the the button handler took too long inlining styles
 			// and the copy command has been disabled.Browsers stipulate that any event handler executing copy, do so within a certain time threshold.
-			// Intended to protect users form Javascript doing random stuff to the clipboard witout a users knowledge, Not an unreasonable approach
+			// Intended to protect users form Javascript doing random stuff to the clipboard without a users knowledge, Not an unreasonable approach
 			// which arguest that to be sure the copy command is auysers intent the time between executing it and starting the click event handler
 			// should not exceed some threshold.
 			//
-			// In practice this never happens unless the elemnet is very large and inlining take s a long time.  But if it does, we
+			// In practice this never happens unless the element is very large and inlining take s a long time.  But if it does, we
 			// will simple flag that the copy is ready and invote (through the styling choices) the user to click it again to do an
-			// actual copy. prepare_copy() will have style the button alread appropriately and set this.#is_prepared. So  we have
+			// actual copy. prepare_copy() will have style the button already appropriately and set this.#is_prepared. So  we have
 			// naught to do here and can pass silently.
-			if (this.debug) console.log(`Copy command looks to have timed-out.`)
-			document.removeEventListener('copy', bound_handler, true);
+			if (this.debug)
+				console.log(`Copy command looks to have timed-out.`);
+			document.removeEventListener("copy", bound_handler, true);
 		}
 	}
 
 	#schedule_preparation() {
 		async function handler() {
-			if (this.debug) console.log(`Scheduled copy preparation triggered ... triggers: ${this.triggers}, preparations: ${this.#is_being_prepared}, ${this.#is_prepared}, ready state: ${document.readyState}`);
-			if (!this.#is_prepared && !this.#is_being_prepared && document.readyState === 'complete') {
+			if (this.debug)
+				console.log(
+					`Scheduled copy preparation triggered ... triggers: ${
+						this.triggers
+					}, preparations: ${this.#is_being_prepared}, ${
+						this.#is_prepared
+					}, ready state: ${document.readyState}`
+				);
+			if (
+				!this.#is_prepared &&
+				!this.#is_being_prepared &&
+				document.readyState === "complete"
+			) {
 				// Schedule and observation before preparation starts, for the simple reason that
 				// preparation can take a long time with very very large elements and so if
 				// this.defer_to_UI is enabled then user interactions might cause a change to the
-				// element. The mutatino handler will in that case ask the preparation to bail and
+				// element. The mutation handler will in that case ask the preparation to bail and
 				// restart one.
 				if (this.triggers.includes("observe")) {
 					if (this.debug) console.log("Starting observer");
@@ -643,26 +729,41 @@ class Copy_With_Style {
 		}
 		if (this.debug) console.log("Scheduling a copy preparation ...");
 		this.button.disabled = true;
-		document.addEventListener('readystatechange', handler.bind(this));
+		document.addEventListener("readystatechange", handler.bind(this));
 	}
 
 	#schedule_observation() {
 		async function handler() {
-			if (this.debug) console.log(`Scheduled observer triggered ... triggers: ${this.triggers}, observe? ${this.observe}, preparations: ${this.#is_being_prepared}, ${this.#is_prepared}, ready state: ${document.readyState}`);
-			if (!this.#is_prepared && !this.#is_being_prepared && document.readyState === 'complete')
+			if (this.debug)
+				console.log(
+					`Scheduled observer triggered ... triggers: ${
+						this.triggers
+					}, observe? ${this.observe}, preparations: ${
+						this.#is_being_prepared
+					}, ${this.#is_prepared}, ready state: ${
+						document.readyState
+					}`
+				);
+			if (
+				!this.#is_prepared &&
+				!this.#is_being_prepared &&
+				document.readyState === "complete"
+			)
 				if (this.triggers.includes("observe") || this.observe) {
 					if (this.debug) console.log(`Starting observer`);
 					this.#observe_element();
 				}
 		}
 		if (this.debug) console.log(`Scheduling an observer ...`);
-		document.addEventListener('readystatechange', handler.bind(this));
+		document.addEventListener("readystatechange", handler.bind(this));
 	}
 
 	#observer = null;
 
 	#observe_element() {
-		this.#observer = new MutationObserver(this.#mutation_handler.bind(this));
+		this.#observer = new MutationObserver(
+			this.#mutation_handler.bind(this)
+		);
 
 		this.#observer.observe(this.element, {
 			subtree: true,
@@ -670,24 +771,31 @@ class Copy_With_Style {
 			attributes: true,
 			attributeOldValue: true,
 			characterData: true,
-			characterDataOldValue: true
+			characterDataOldValue: true,
 		});
 	}
 
 	// Check (or await) if we're ready to prepare for a copy
 	async #ready_to_prepare(fingerprint = "no fingerprint") {
-		if (this.debug) console.log(`${fingerprint} Document Ready State: ${document.readyState}`);
+		if (this.debug)
+			console.log(
+				`${fingerprint} Document Ready State: ${document.readyState}`
+			);
 		// If prepare_copy() is running and is not complete
 		if (this.#is_being_prepared) {
 			// if it's already been asked to bail, kick back and let it do just that
 			if (this.#bail) {
-				if (this.debug) console.log(`${fingerprint} Already bailing ... let it be.`);
+				if (this.debug)
+					console.log(
+						`${fingerprint} Already bailing ... let it be.`
+					);
 				// Let it act on the signal and bail request
 				await this.#defer_to_UI();
 
 				// if it's not already been asked to bail, then ask it to bail
 			} else {
-				if (this.debug) console.log(`${fingerprint} Requesting bail...`);
+				if (this.debug)
+					console.log(`${fingerprint} Requesting bail...`);
 				this.#bail = true;
 
 				// Let it act on the signal and bail request
@@ -695,10 +803,14 @@ class Copy_With_Style {
 
 				// Check if it did bail!
 				if (this.#bailed) {
-					if (this.debug) console.log(`${fingerprint} Observed bail... `);
+					if (this.debug)
+						console.log(`${fingerprint} Observed bail... `);
 					this.#bailed = false;
 				} else {
-					if (this.debug) console.log(`${fingerprint} REQUESTED BAIL NOT HONORED!`);
+					if (this.debug)
+						console.log(
+							`${fingerprint} REQUESTED BAIL NOT HONORED!`
+						);
 				}
 			}
 		}
@@ -710,15 +822,18 @@ class Copy_With_Style {
 	// So it's safe to assume changes have already been applied to the DOM
 	async #mutation_handler(mutations) {
 		const fingerprint = performance.now();
-		if (this.debug) console.log(`${fingerprint} mutation: readystate is ${document.readyState}`);
+		if (this.debug)
+			console.log(
+				`${fingerprint} mutation: readystate is ${document.readyState}`
+			);
 		this.invalidate(); // Invalidate any existing preparation
-		if (this.triggers.includes("observe")) // If a preparation trigger is bound to the observaion, prepare when ready.
+		if (this.triggers.includes("observe"))
+			// If a preparation trigger is bound to the observation, prepare when ready.
 			self.prepare_copy_when_ready(fingerprint);
 	}
 
-
 	/*****************************************************************************************
-	Element exclusion defintions (elements to exclude from the copy when inlining styles).
+	Element exclusion definitions (elements to exclude from the copy when inlining styles).
 	There are two types:
 
 	deep exclusion: meaning we remove the matched element and all its children. This is
@@ -729,7 +844,7 @@ class Copy_With_Style {
 	shallow exclusion: Only the element is excluded, its children are grafted to its parent.
 					   This is intended for useless wrappers. The two standard cases
 					   implemented are: A tags that link to local site URLS (those starting
-					   with /) - such links don't reolve in any pasted context. The source
+					   with /) - such links don't resolve in any pasted context. The source
 					   element can always write them with full URLS if wishing to see them
 					   copied. and DIV tags with the "tooltip" class. Reserved class name
 					   for tooltip implementations that wrap text that has a tooltip in such
@@ -738,41 +853,48 @@ class Copy_With_Style {
 
 	// Determine if a given element is hidden. When inlining styles, hidden elements are dropped.
 	#deep_exclude_from_copy(element) {
-		if (typeof this.deep_exclusions === 'function')
+		if (typeof this.deep_exclusions === "function")
 			return this.deep_exclusions(element);
 		else {
 			const style = window.getComputedStyle(element);
-			let exclude = (style.visibility === "hidden" || style.display === "none");
-			if (typeof this.extra_deep_exclusions === 'function')
+			let exclude =
+				style.visibility === "hidden" || style.display === "none";
+			if (typeof this.extra_deep_exclusions === "function")
 				exclude = exclude || this.extra_deep_exclusions(element);
 			return exclude;
 		}
 	}
 
-	// We also drop any anchor (A) tags that link to a local URL (one begining with /) as these
+	// We also drop any anchor (A) tags that link to a local URL (one beginning with /) as these
 	// lose meaning in any pasted context. If they are desired it's the source element need only
 	// prepare itself nby including the https://mysite/ prefix to them so they have meaning in a
-	// pasted context. And tooltip divs and details/sumary tags are also handled as shallow
+	// pasted context. And tooltip divs and details/summary tags are also handled as shallow
 	// exclusions.
 	#shallow_exclude_from_copy(element) {
-		if (typeof this.shallow_exclusions === 'function')
+		if (typeof this.shallow_exclusions === "function")
 			return this.shallow_exclusions(element);
 		else {
 			// Default shallow exclusions:
 			//   All internal links (the A tag is removed)
 			//   All tooltip divs (the actual tooltip is a deep exclusion as it is hidden)
 			//   All details text if requested - this one is special losing all content bar the summary.
-			let exclude = (element.nodeName === "A" && element.getAttribute("href").startsWith("/"))
-				|| (element.nodeName === "DIV" && element.classList.contains("tooltip"))
-				|| (this.summarize_details && element.nodeName === "DETAILS");
-			if (typeof this.extra_shallow_exclusions === 'function')
+			let exclude =
+				(element.nodeName === "A" &&
+					element.getAttribute("href").startsWith("/")) ||
+				(element.nodeName === "DIV" &&
+					element.classList.contains("tooltip")) ||
+				(this.summarize_details && element.nodeName === "DETAILS");
+			if (typeof this.extra_shallow_exclusions === "function")
 				exclude = exclude || this.extra_shallow_exclusions(element);
 			return exclude;
 		}
 	}
 
 	#exclude_from_copy(element) {
-		return this.#deep_exclude_from_copy(element) || this.#shallow_exclude_from_copy(element);
+		return (
+			this.#deep_exclude_from_copy(element) ||
+			this.#shallow_exclude_from_copy(element)
+		);
 	}
 
 	/*****************************************************************************************
@@ -786,26 +908,30 @@ class Copy_With_Style {
 	// with effectively a null function. With a 0 time into the future, it returns
 	// more or less immediately BUT, the key thing to not is the Javascript single
 	// threaded idiosyncracy .. and that setTimeout() is the one known method of
-	// yielfing control for a moment to the event loop so that UI events can continue
+	// yielding control for a moment to the event loop so that UI events can continue
 	// to be handled. To wit, this mysterious little line of code, permits means the
 	// UI remains responsive if it is called from time to time.
 	#defer_to_UI(how_long = 0) {
-		return new Promise(resolve => setTimeout(resolve, how_long));
+		return new Promise((resolve) => setTimeout(resolve, how_long));
 	}
 
 	// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/clientWidth
-	// On one cross check taking screen grabs and measurig the borgress bar and comparing against this
+	// On one cross check taking screen grabs and measuring the progress bar and comparing against this
 	// Firefox reports correctly and Chromium reports the same number as Firefox, but renders another
 	// 13 pixels wider for some reason. C'est la vie.
 	#bar_width(progress_bar) {
 		const style = window.getComputedStyle(progress_bar);
-		return progress_bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+		return (
+			progress_bar.clientWidth -
+			parseFloat(style.paddingLeft) -
+			parseFloat(style.paddingRight)
+		);
 	}
 
 	// A simple basename for matching stylesheets
 	#basename(str, sep1, sep2) {
-		if (sep1 == undefined) sep1 = '/';
-		if (sep2 == undefined) sep2 = '?';
+		if (sep1 == undefined) sep1 = "/";
+		if (sep2 == undefined) sep2 = "?";
 		const parts1 = str.split(sep1);
 		const parts2 = parts1[parts1.length - 1].split(sep2);
 		return parts2[0];
@@ -813,13 +939,13 @@ class Copy_With_Style {
 
 	// A teeny function that zips two Arrays together (like Python's zip)
 	// See: https://stackoverflow.com/a/10284006/4002633
-	#zip = rows => rows[0].map((_, c) => rows.map(row => row[c]));
+	#zip = (rows) => rows[0].map((_, c) => rows.map((row) => row[c]));
 
 	/*****************************************************************************************
 	Bottom up tree pruning methods.
 
 	We need to walk bottom up to reliably remove the hallow excludes. These are like DIV
-	wrappers and such that we want to remove. They are identidfied by:
+	wrappers and such that we want to remove. They are identified by:
 
 	this.#shallow_exclude_from_copy
 
@@ -827,10 +953,10 @@ class Copy_With_Style {
 	from the bottom up, the leaves of the tree.
 
 	Walking up from the bottom is non trivial, but centres on identifying leaves and the twigs
-	that they are attched to. Leaves are nominally those elements with no children and twigs
+	that they are attached to. Leaves are nominally those elements with no children and twigs
 	are the list of Elements walimg up to (and not including) the first junction. If we process
-	all those from leaf to junction, then the new leaves are thos junctions and we repeat
-	recurisively until we are down to one leaf then none.
+	all those from leaf to junction, then the new leaves are those junctions and we repeat
+	recursively until we are down to one leaf then none.
 	******************************************************************************************/
 
 	// Enumerate all leaves in element tree (nodes that have no children)
@@ -848,7 +974,7 @@ class Copy_With_Style {
 	// return the twig that an element is on,
 	// being the list of nodes from element up to the first junction
 	#twig(element) {
-		let e = element
+		let e = element;
 		let twig = [e];
 		while (e.parentElement && e.parentElement.children.length == 1) {
 			e = e.parentElement;
@@ -859,31 +985,35 @@ class Copy_With_Style {
 	}
 
 	// enumerate all the twigs in element tree (that have leaves at the end)
-	#enumerate_clone_twigs(leaves = this.#enumerate_clone_leaves(), element = this.#clone, twigs = []) {
-		for (let leaf of leaves)
-			twigs.push(this.#twig(leaf));
+	#enumerate_clone_twigs(
+		leaves = this.#enumerate_clone_leaves(),
+		element = this.#clone,
+		twigs = []
+	) {
+		for (let leaf of leaves) twigs.push(this.#twig(leaf));
 		return twigs;
 	}
 
 	#prune_twigs(twigs = this.#enumerate_clone_twigs()) {
 		for (let twig of twigs)
 			for (let element of twig)
-				if (this.#shallow_exclude_from_copy(element))
-					{	// A shallow exclclusion of DETAILS is special, only SUMMARY remains.
-						if (element.nodeName === "DETAILS") {
-							const summary = element.querySelector("SUMMARY");
-							element.replaceWith(summary);
+				if (this.#shallow_exclude_from_copy(element)) {
+					// A shallow exclusion of DETAILS is special, only SUMMARY remains.
+					if (element.nodeName === "DETAILS") {
+						const summary = element.querySelector("SUMMARY");
+						element.replaceWith(summary);
 						// Everything else is shallow excluded by keeping all the children
-						} else {
-							element.replaceWith(...element.childNodes)
-						}
+					} else {
+						element.replaceWith(...element.childNodes);
 					}
+				}
 
-		// return the new leaves (considerig all these twigs pruned)
+		// return the new leaves (considering all these twigs pruned)
 		let leaves = [];
 		for (let twig of twigs) {
-			const parent = twig.pop().parentElement
-			if (parent !== null && !leaves.includes(parent)) leaves.push(parent);
+			const parent = twig.pop().parentElement;
+			if (parent !== null && !leaves.includes(parent))
+				leaves.push(parent);
 		}
 
 		return leaves;
