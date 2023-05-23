@@ -18,7 +18,7 @@
  * @license Hippocratic License Version Number: 2.1.
  */
 
-class Copy_With_Style {
+export default class Copy_With_Style {
 	element = null; // The element to copy to the clipboard (with style!)
 	button = null; // The button that, we attach a click even handler to to copy the the element to the clipboard
 	mode = null; // "attribute" (to inline all styles with a "style" attribute on each element) or "tag" (to include a "style" tag)
