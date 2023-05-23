@@ -1,12 +1,14 @@
 /**
  * Copy With Style.
  *
- * Provides support of a copy button on a web page that copies a nominated elements true to its rendered style,
- * to the clipboard. Offers th option to include all styles with a <style> tag prefixing the elements outerHTML,
- * or alternately with a "style" attributes added to each element (the nominate element and all its children),
- * called ""inlining" styles.
+ * Provides support of a copy button on a web page that copies a nominated element with its rendered style
+ * to the clipboard.
  *
- * Inlining styles (applying them as a "style" attribute one each element) is expensive (slow) and produces more
+ * Offers a option to include all styles with a <style> tag prefixing the elements outerHTML,
+ * or alternately with a "style" attribute added to each element (the nominate element and all its children),
+ * called "inlining" styles.
+ *
+ * Inlining styles (applying them as "style" attribute on each element) is expensive (slow) and produces more
  * data, conceivably much more data than not inlining them (providing them via a <style> tag), but produces a copy
  * that can reliably be emailed. Most email clients today (2021) have patchy or no support for the style tag.
  * Conversely most email clients respect and render inline style attributes faithfully.
@@ -20,7 +22,7 @@
 
 class Copy_With_Style {
 	element = null; // The element to copy to the clipboard (with style!)
-	button = null; // The button that, we attach a click even handler to to copy the the element to the clipboard
+	button = null; // The button that, we attach a click event handler to copy the element to clipboard
 	mode = null; // "attribute" (to inline all styles with a "style" attribute on each element) or "tag" (to include a "style" tag)
 	progress = null; // A progress element that is a sibling or child of the button by default but can be specified explicitly.
 	stylesheets = "inline";
@@ -34,17 +36,17 @@ class Copy_With_Style {
 	show_progress = true;
 
 	// We wrap the nominated element in a div that is not in the DOM. We can copy the wrapper
-	// with the element or not. Matters little it's a simple div.'
+	// with the element or not. Matters little as it's a simple div.
 	copy_wrapper = true;
 
-	// Styling classes for the button. A supplied button is given these classes to communicate state of
+	// Styling classes for the button. These classes will be appended to the button representing state of
 	// the preparation and copy.
 	class_button = null;
 	class_preparing = null;
 	class_ready = null;
 
-	// Element exclusion overrides and augmentations. These are all function that are called
-	// if defined and passed an HTML element as their sole argument. Thy must return true or
+	// Element exclusion overrides and augmentations. These are functions that are called
+	// if defined and passed an HTML element as their sole argument. They must return true or
 	// false, true to exclude, false to keep.
 	//
 	// the extra_pair are in addition to default implementations
