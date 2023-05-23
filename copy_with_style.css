@@ -19,11 +19,12 @@ button.preparing_for_copy {
 }
 
 /*  A style to use when a copy is ready 
-	Clicking the button now will copy the to the clipboard the prepared copy
+	Clicking the button now will copy, to the clipboard, the prepared copy.
 	
-	This class is added when "preparing_for_copy" is rmeoved and removed only
-	when the prepared copy is invalidated. Which can be by an explicit call
-	to .invalidate(), or if 
+	This class is added when "preparing_for_copy" is removed. The class is 
+	removed only when the prepared copy is invalidated. Which can be by an 
+	explicit call to .invalidate(), or if the "element" that was prepared, 
+        changes.
 */
 button.ready_to_copy {
     transform: scale(1.3, 1.3);
