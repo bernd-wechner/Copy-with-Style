@@ -10,7 +10,7 @@ button.copy_with_style { }
 	bound to a restart_the_preparation command (will simply retsart 
 	the preparation when clicked)
 	
-	This class is added in addtions ot "copy_with_style" when 
+	This class is added in addition to "copy_with_style" when 
 	strings to place on the clipboard ar ebeing prepared. And
 	removed when the prepartion is complete.   
 */
