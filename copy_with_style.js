@@ -4,8 +4,8 @@
  * Provides support of a copy button on a web page that copies a nominated element with its rendered style
  * to the clipboard.
  *
- * Offers a option to include all styles with a <style> tag prefixing the elements outerHTML,
- * or alternately with a "style" attribute added to each element (the nominate element and all its children),
+ * Offers an option to include all styles with a <style> tag prefixing the element's outerHTML,
+ * or alternately with a "style" attribute added to each element (the nominated element and all its children),
  * called "inlining" styles.
  *
  * Inlining styles (applying them as "style" attribute on each element) is expensive (slow) and produces more
@@ -49,7 +49,7 @@ class Copy_With_Style {
 	// if defined and passed an HTML element as their sole argument. They must return true or
 	// false, true to exclude, false to keep.
 	//
-	// the extra_pair are in addition to default implementations
+	// the `extra_` pairs are in addition to default implementations
 	// the other two replace the default implementations
 	//
 	// Deep exclusions exclude the element and all its children.
@@ -177,14 +177,14 @@ class Copy_With_Style {
 		this.observe = observe;
 		this.show_progress = progress ? true : false;
 		this.copy_wrapper = copy_wrapper;
-		(this.class_button = class_button),
-			(this.class_preparing = class_preparing),
-			(this.class_ready = class_ready),
-			(this.deep_exclusions = deep_exclusions),
-			(this.shallow_exclusions = shallow_exclusions),
-			(this.extra_deep_exclusions = extra_deep_exclusions),
-			(this.extra_shallow_exclusions = extra_shallow_exclusions),
-			(this.debug = debug);
+		this.class_button = class_button;
+		this.class_preparing = class_preparing;
+		this.class_ready = class_ready;
+		this.deep_exclusions = deep_exclusions;
+		this.shallow_exclusions = shallow_exclusions;
+		this.extra_deep_exclusions = extra_deep_exclusions;
+		this.extra_shallow_exclusions = extra_shallow_exclusions;
+		this.debug = debug;
 		this.log_performance = log_performance;
 		this.log_HTML_to_console = log_HTML_to_console;
 		this.log_text_to_console = log_text_to_console;
