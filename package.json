@@ -1,0 +1,19 @@
+{
+  "name": "copy-with-style",
+  "version": "1.0.0",
+  "description": "A single file client-side JavaScript class that supports copying fully styled HTML elements to the clipboard",
+  "author": "Bernd Wechner",
+  "scripts": {
+    "build": "rollup -c rollup.config.ts --configPlugin esbuild",
+    "prepublish": "pnpm build"
+  },
+  "packageManager": "pnpm@8.5.1",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "esbuild": "0.17.19",
+    "rollup": "3.23.0",
+    "rollup-plugin-esbuild": "5.0.0"
+  }
+}
